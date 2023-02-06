@@ -2,3 +2,7 @@ node_modules/
 learn/
 package-lock.json
 yarn.lock
+.idea/
+
+auth-service/auth-service
+auth-service/.env
