@@ -4,6 +4,7 @@ var fs = require("fs");
 var {Client} = require("pg");
 var crypto = require('crypto');
 var request = require('request');
+var syncrequest = require('sync-request');
 
 //connect to Postgres
 const database = new Client({
@@ -31,14 +32,14 @@ router.post("/", async (req, res) => {
         let user;
 
         try{
-            user = await (get_user(reservation.user_id));
+            user = await (get_user(reservation.token));
             flight = await (get_flight(reservation.flight_serial, reservation.class, reservation_list.length));
 
         } catch(err){
             res.status(400).send({message:"invalid input for reservation" ,code :400});
         }
         
-        if(!user || user.length < 1){
+        if(!user){
             res.status(400).send({message:"invalid user error" ,code :400});
             console.log(user);
         }
@@ -69,20 +70,36 @@ router.post("/", async (req, res) => {
 });
 
 
-var get_user = async function(user_id){
-    let user;
-    let query = `SELECT * FROM user_account WHERE user_id = ${user_id};`;
+var get_user = async function(token){
+
     try{
-        user = await database.query(query);
-
-    }catch(err){
+        var res = syncrequest('GET', 'https://localhost:9000/user-info', {
+        headers: {
+            'Authorization': token,
+        },
+        });
+        console.log(res.getBody());   
+        let user = JSON.parse(res.getBody()); 
+        return user;
+    }
+    catch(err){
         console.log(err.stack);
-    } 
+    }
+    // let user;
+    // let query = `SELECT * FROM user_account WHERE user_id = ${user_id};`;
+    // try{
+    //     user = await database.query(query);
 
-    return user.rows;
+    // }catch(err){
+    //     console.log(err.stack);
+    // }
+
+    // return user.rows;
+
 }
 
 var get_flight = async function(flight_serial, clas, number){
+    
     let flight;
     let query = `SELECT * from available_offers WHERE flight_id = '${flight_serial}' AND ${clas.toLowerCase()}_class_free_capacity >= ${number};`;
     try{
@@ -101,6 +118,7 @@ var get_flight = async function(flight_serial, clas, number){
     }
 
     return flight.rows;
+
 }
 
 var validate_list = function(useres_list){
@@ -169,7 +187,7 @@ var make_purchase  = function(transaction_details, receipt_id, user, flight, res
 
 var add_purchase = function(transaction_id, receipt_id, user, flight, offer_price, offer_class, first_name, last_name){
     let query = `INSERT INTO purchase(corresponding_user_id , title, first_name, last_name, flight_serial, offer_price, offer_class, transaction_id, transaction_result)
-    VALUES (${user.user_id}, ${receipt_id}, '${first_name}', '${last_name}', ${flight.flight_serial}, ${offer_price}, '${offer_class}',  ${transaction_id}, 0 );`
+    VALUES (${user.Id}, ${receipt_id}, '${first_name}', '${last_name}', ${flight.flight_serial}, ${offer_price}, '${offer_class}',  ${transaction_id}, 0 );`
     try{
         database.query(query);
         }catch(err){

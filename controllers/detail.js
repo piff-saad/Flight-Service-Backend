@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var fs = require("fs");
 var {Client} = require("pg");
+var syncrequest = require('sync-request');
 
 //connect to Postgres
 const database = new Client({
@@ -22,9 +23,9 @@ router.get('/account_purchase', async (req, res) => {
         let body = req.query;
         let user;
         try{
-            user = await (get_user(body.user_id));
+            user = await (get_user(body.token));
             
-            if(!user || user.length < 1) 
+            if(!user) 
             res.status(400).send({message:"invalid user for request" ,code :400});
 
         } catch(err){
@@ -32,7 +33,7 @@ router.get('/account_purchase', async (req, res) => {
         }
 
         let purchases;
-        purchases = await get_purchases(body.user_id);
+        purchases = await get_purchases(user.Id);
 
         if(!purchases){
             res.status(400).send({message:"invalid input for purchases" ,code :400});
@@ -52,9 +53,9 @@ router.get('/account_detail', async (req, res) => {
         let body = req.query;
         let user;
         try{
-            user = await (get_user(body.user_id));
+            user = await (get_user(body.token));
             
-            if(!user || user.length < 1) 
+            if(!user) 
             res.status(400).send({message:"invalid user for request" ,code :400});
 
             else{
@@ -100,16 +101,29 @@ router.get('/get_filterd_flights', async (req, res) => {
 });
 
 
-var get_user = async function(user_id){
-    let user;
-    let query = `SELECT * FROM user_account WHERE user_id = ${user_id}`;
+var get_user = async function(token){
     try{
-        user = await database.query(query);
-        return user.rows;
-
-    }catch(err){
+        var res = syncrequest('GET', 'https://localhost:9000/user-info', {
+        headers: {
+            'Authorization': token,
+        },
+        });
+        console.log(res.getBody());   
+        let user = JSON.parse(res.getBody()); 
+        return user;
+    }
+    catch(err){
         console.log(err.stack);
-    } 
+    }
+    // let user;
+    // let query = `SELECT * FROM user_account WHERE user_id = ${user_id}`;
+    // try{
+    //     user = await database.query(query);
+    //     return user.rows;
+
+    // }catch(err){
+    //     console.log(err.stack);
+    // } 
 
 }
 
