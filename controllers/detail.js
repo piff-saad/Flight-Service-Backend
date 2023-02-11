@@ -59,7 +59,7 @@ router.get('/account_detail', async (req, res) => {
             res.status(400).send({message:"invalid user for request" ,code :400});
 
             else{
-                res.status(200).send(user[0]);
+                res.status(200).send(user);
             }
 
         } catch(err){
