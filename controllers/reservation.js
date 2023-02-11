@@ -1,3 +1,5 @@
+const config = require("./config");
+
 var express = require('express');
 var router = express.Router();
 var fs = require("fs");
@@ -7,16 +9,10 @@ var request = require('request');
 var syncrequest = require('sync-request');
 
 //connect to Postgres
-const database = new Client({
-  user: 'postgres', //your pg user
-  host: 'localhost', 
-  database: 'HW2',  //your db
-  password: '1596324780', //your pg user password
-  port: 5432, //default port
-});
+const database = new Client(config);
 
-database.connect(function(err) {
-  if (err) throw err;
+database.connect(function (err) {
+    if (err) throw err;
 });
 
 router.get("/transaction", async (req, res) => {
@@ -25,7 +21,7 @@ router.get("/transaction", async (req, res) => {
 
 router.post("/", async (req, res) => {
     //required validations
-     try{   
+    try {
         let reservation = req.query;
         let reservation_list = JSON.parse(reservation.list);
         let token = req.headers['token'];
@@ -36,54 +32,46 @@ router.post("/", async (req, res) => {
             user = await (get_user(token));
             flight = await (get_flight(reservation.flight_serial, reservation.class, reservation_list.length));
 
-        } catch(err){
-            res.status(400).send({message:"invalid input for reservation" ,code :400});
+        } catch (err) {
+            res.status(400).send({message: "invalid input for reservation", code: 400});
         }
-        
-        if(!user){
-            res.status(400).send({message:"invalid user error" ,code :400});
+
+        if (!user) {
+            res.status(400).send({message: "invalid user error", code: 400});
             console.log(user);
-        }
-
-        else if(!reservation_list || !reservation_list.length ||reservation_list.length < 1 || !validate_list(reservation_list)){
-            res.status(400).send({message:"invalid input for passengers data" ,code :400});
+        } else if (!reservation_list || !reservation_list.length || reservation_list.length < 1 || !validate_list(reservation_list)) {
+            res.status(400).send({message: "invalid input for passengers data", code: 400});
             console.log(reservation_list);
-        }
-
-        
-        else if(!flight || flight.length < 1){
-            res.status(400).send({message:"flight is not available for reservation" ,code :400});
+        } else if (!flight || flight.length < 1) {
+            res.status(400).send({message: "flight is not available for reservation", code: 400});
             console.log(flight);
-        }
-
-        else{
+        } else {
             console.log(flight[0]);
             console.log(reservation.class.toUpperCase());
             let flight_detail = get_amount(flight[0], reservation.class.toUpperCase(), reservation_list.length);
             res.status(200);
             transaction_req(user, flight[0], reservation_list, flight_detail.price, flight_detail.o_price, flight_detail.o_class, res);
         }
-    }catch(err){
+    } catch (err) {
         console.log(err.stack);
         res.end();
     }
-    
+
 });
 
 
-var get_user = async function(token){
+var get_user = async function (token) {
 
-    try{
-        var res = syncrequest('GET', 'https://localhost:9000/user-info', {
-        headers: {
-            'Authorization': token,
-        },
+    try {
+        var res = syncrequest('GET', 'http://localhost:9000/user-info', {
+            headers: {
+                'Authorization': `JWT ${token}`,
+            },
         });
-        console.log(res.getBody());   
-        let user = JSON.parse(res.getBody()); 
+        console.log(res.getBody());
+        let user = JSON.parse(res.getBody());
         return user;
-    }
-    catch(err){
+    } catch (err) {
         console.log(err.stack);
     }
     // let user;
@@ -99,22 +87,22 @@ var get_user = async function(token){
 
 }
 
-var get_flight = async function(flight_serial, clas, number){
-    
+var get_flight = async function (flight_serial, clas, number) {
+
     let flight;
     let query = `SELECT * from available_offers WHERE flight_id = '${flight_serial}' AND ${clas.toLowerCase()}_class_free_capacity >= ${number};`;
-    try{
+    try {
         flight = await database.query(query);
 
-    }catch(err){
+    } catch (err) {
         console.log(err.stack);
     }
 
     query = `SELECT * FROM flight WHERE flight_id = '${flight_serial}';`;
-    try{
-        let temp  = await database.query(query);
+    try {
+        let temp = await database.query(query);
         flight.rows[0].flight_serial = temp.rows[0].flight_serial;
-    }catch(err){
+    } catch (err) {
         console.log(err.stack);
     }
 
@@ -122,28 +110,28 @@ var get_flight = async function(flight_serial, clas, number){
 
 }
 
-var validate_list = function(useres_list){
-    for(let i = 0; i < useres_list.length; i++)
-        if(!useres_list[i].first_name || !useres_list[i].last_name) return false;
+var validate_list = function (useres_list) {
+    for (let i = 0; i < useres_list.length; i++)
+        if (!useres_list[i].first_name || !useres_list[i].last_name) return false;
     return true;
 }
 
-var get_amount = function(flight, clas, number){
+var get_amount = function (flight, clas, number) {
 
     let offer_class;
     let offer_price;
     let amount;
-    if(clas == "Y"){
+    if (clas == "Y") {
         offer_class = "Y";
         offer_price = flight.y_price;
         amount = flight.y_price * number;
 
-    } else  if(clas == "J"){
+    } else if (clas == "J") {
         offer_class = "J";
         offer_price = flight.j_price;
         amount = flight.j_price * number;
 
-    } else  if(clas == "F"){
+    } else if (clas == "F") {
         offer_class = "F";
         offer_price = flight.f_price;
         amount = flight.f_price * number;
@@ -152,15 +140,15 @@ var get_amount = function(flight, clas, number){
     return {price: amount, o_price: offer_price, o_class: offer_class};
 }
 
-var transaction_req = function(user, flight, reservation_list, price, offer_price, offer_class, res){
+var transaction_req = function (user, flight, reservation_list, price, offer_price, offer_class, res) {
     let rec_id = Date.now() - Math.floor(Math.random() * 100000000);
 
     let postData = {
-        'amount' : price,
-        'receipt_id' : rec_id,
-        'callback' : `http://127.0.0.1:9090/transaction/${rec_id}`
+        'amount': price,
+        'receipt_id': rec_id,
+        'callback': `http://127.0.0.1:9090/transaction/${rec_id}`
     };
-    
+
     var clientServerOptions = {
         url: 'http://127.0.0.1:8000/transaction/',
         body: JSON.stringify(postData),
@@ -170,13 +158,13 @@ var transaction_req = function(user, flight, reservation_list, price, offer_pric
         }
     }
     request(clientServerOptions, function (error, response) {
-      let transaction_details =  JSON.parse(response.body);
-        
-      make_purchase(transaction_details, rec_id, user, flight, reservation_list, offer_price, offer_class, res);
+        let transaction_details = JSON.parse(response.body);
+
+        make_purchase(transaction_details, rec_id, user, flight, reservation_list, offer_price, offer_class, res);
     })
 }
 
-var make_purchase  = function(transaction_details, receipt_id, user, flight, reservation_list, offer_price, offer_class, res){
+var make_purchase = function (transaction_details, receipt_id, user, flight, reservation_list, offer_price, offer_class, res) {
     let transaction_id = transaction_details.id;
 
     reservation_list.forEach(element => {
@@ -186,14 +174,14 @@ var make_purchase  = function(transaction_details, receipt_id, user, flight, res
     res.redirect(`http://127.0.0.1:8000/payment/${transaction_id}`);
 }
 
-var add_purchase = function(transaction_id, receipt_id, user, flight, offer_price, offer_class, first_name, last_name){
+var add_purchase = function (transaction_id, receipt_id, user, flight, offer_price, offer_class, first_name, last_name) {
     let query = `INSERT INTO purchase(corresponding_user_id , title, first_name, last_name, flight_serial, offer_price, offer_class, transaction_id, transaction_result)
     VALUES (${user.Id}, ${receipt_id}, '${first_name}', '${last_name}', ${flight.flight_serial}, ${offer_price}, '${offer_class}',  ${transaction_id}, 0 );`
-    try{
+    try {
         database.query(query);
-        }catch(err){
-            console.log(err.stack);
-        }
+    } catch (err) {
+        console.log(err.stack);
+    }
 }
 
 

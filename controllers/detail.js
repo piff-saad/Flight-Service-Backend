@@ -3,29 +3,24 @@ var router = express.Router();
 var fs = require("fs");
 var {Client} = require("pg");
 var syncrequest = require('sync-request');
+const config =   require("./config");
 
 //connect to Postgres
-const database = new Client({
-  user: 'postgres', //your pg user
-  host: 'localhost', 
-  database: 'HW2',  //your db
-  password: '1596324780', //your pg user password
-  port: 5432, //default port
-});
+const database = new Client(config);
 
 database.connect(function(err) {
   if (err) throw err;
 });
 
 router.get('/account_purchase', async (req, res) => {
-    
-    try{   
+
+    try{
         let token = req.headers['token'];
         let user;
         try{
             user = await (get_user(token));
-            
-            if(!user) 
+
+            if(!user)
             res.status(400).send({message:"invalid user for request" ,code :400});
 
         } catch(err){
@@ -48,14 +43,14 @@ router.get('/account_purchase', async (req, res) => {
   });
 
 router.get('/account_detail', async (req, res) => {
-    
-    
+
+
         let token = req.headers['token'];
         let user;
         try{
             user = await (get_user(token));
-            
-            if(!user) 
+
+            if(!user)
             res.status(400).send({message:"invalid user for request" ,code :400});
 
             else{
@@ -80,7 +75,7 @@ router.get('/all_available_flights', async (req, res) => {
 });
 
 router.get('/get_filterd_flights', async (req, res) => {
-    try{   
+    try{
         let body = req.query;
         let origin = body.origin;
         let destination = body.destination;
@@ -95,7 +90,7 @@ router.get('/get_filterd_flights', async (req, res) => {
         else res.status(200).send(flights);
 
     }catch(err){
-        console.log(err.stack);
+         console.log(err.stack);
         res.status(400).send({message:"invalid input for flight search" ,code :400});
     }
 });
@@ -103,13 +98,13 @@ router.get('/get_filterd_flights', async (req, res) => {
 
 var get_user = async function(token){
     try{
-        var res = syncrequest('GET', 'https://localhost:9000/user-info', {
+        var res = syncrequest('GET', 'http://localhost:9000/user-info', {
         headers: {
-            'Authorization': token,
+            'Authorization': `JWT ${token}`,
         },
         });
-        console.log(res.getBody());   
-        let user = JSON.parse(res.getBody()); 
+        console.log(res.getBody());
+        let user = JSON.parse(res.getBody());
         return user;
     }
     catch(err){
@@ -123,7 +118,7 @@ var get_user = async function(token){
 
     // }catch(err){
     //     console.log(err.stack);
-    // } 
+    // }
 
 }
 
@@ -136,7 +131,7 @@ var get_purchases = async function(user_id){
 
     }catch(err){
         console.log(err.stack);
-    } 
+    }
 
 }
 
@@ -149,7 +144,7 @@ var get_all_flights = async function(){
 
     }catch(err){
         console.log(err.stack);
-    } 
+    }
 
 }
 
@@ -162,7 +157,7 @@ var get_filtered_flights = async function(origin, destination, date){
 
     }catch(err){
         console.log(err.stack);
-    } 
+    }
 
 }
 

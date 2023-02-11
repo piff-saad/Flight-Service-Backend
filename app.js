@@ -9,7 +9,7 @@ var app = express();
 // //connect to Postgres
 // const db = new Client({
 //   user: 'postgres', //your pg user
-//   host: 'localhost', 
+//   host: 'localhost',
 //   database: 'HW2',  //your db
 //   password: '1596324780', //your pg user password
 //   port: 5432, //default port
@@ -58,7 +58,7 @@ app.use('/detail',transaction);
 
 //start listenning
 app.listen(9090,function(){
-    console.log("Starting....")
+    console.log("started on port 9090: ")
 });
 
 // module.exports = db;

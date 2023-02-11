@@ -2,15 +2,10 @@ var express = require('express');
 var router = express.Router();
 var fs = require("fs");
 var {Client} = require("pg");
+const config =   require("./config");
 
 //connect to Postgres
-const database = new Client({
-  user: 'postgres', //your pg user
-  host: 'localhost', 
-  database: 'HW2',  //your db
-  password: '1596324780', //your pg user password
-  port: 5432, //default port
-});
+const database = new Client(config);
 
 database.connect(function(err) {
   if (err) throw err;
@@ -31,7 +26,7 @@ var set_purchase_status = async function(purchase_id, status){
 
   }catch(err){
       console.log(err.stack);
-  } 
+  }
 
 }
 
