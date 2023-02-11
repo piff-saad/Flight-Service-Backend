@@ -28,11 +28,12 @@ router.post("/", async (req, res) => {
      try{   
         let reservation = req.query;
         let reservation_list = JSON.parse(reservation.list);
+        let token = req.headers['token'];
         let flight;
         let user;
 
         try{
-            user = await (get_user(reservation.token));
+            user = await (get_user(token));
             flight = await (get_flight(reservation.flight_serial, reservation.class, reservation_list.length));
 
         } catch(err){
@@ -60,7 +61,7 @@ router.post("/", async (req, res) => {
             console.log(reservation.class.toUpperCase());
             let flight_detail = get_amount(flight[0], reservation.class.toUpperCase(), reservation_list.length);
             res.status(200);
-            transaction_req(user[0], flight[0], reservation_list, flight_detail.price, flight_detail.o_price, flight_detail.o_class, res);
+            transaction_req(user, flight[0], reservation_list, flight_detail.price, flight_detail.o_price, flight_detail.o_class, res);
         }
     }catch(err){
         console.log(err.stack);

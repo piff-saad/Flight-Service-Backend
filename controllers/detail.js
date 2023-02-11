@@ -20,10 +20,10 @@ database.connect(function(err) {
 router.get('/account_purchase', async (req, res) => {
     
     try{   
-        let body = req.query;
+        let token = req.headers['token'];
         let user;
         try{
-            user = await (get_user(body.token));
+            user = await (get_user(token));
             
             if(!user) 
             res.status(400).send({message:"invalid user for request" ,code :400});
@@ -50,10 +50,10 @@ router.get('/account_purchase', async (req, res) => {
 router.get('/account_detail', async (req, res) => {
     
     
-        let body = req.query;
+        let token = req.headers['token'];
         let user;
         try{
-            user = await (get_user(body.token));
+            user = await (get_user(token));
             
             if(!user) 
             res.status(400).send({message:"invalid user for request" ,code :400});
