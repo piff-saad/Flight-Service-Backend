@@ -6,3 +6,9 @@ yarn.lock
 
 auth-service/auth-service
 auth-service/.env
+
+front/.idea
+front/.vscode
+front/dist
+front/node_modules
+

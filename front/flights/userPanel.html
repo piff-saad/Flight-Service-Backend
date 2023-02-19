@@ -1,0 +1,57 @@
+<!-- THIS PAGE LISTS OUT AVAILABLE FLIGHTS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Availablity</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/flights.css">
+  <style>
+     body{
+       background-image: url("imgs/b.jpg");
+       background-repeat: no-repeat;
+       background-size: cover;
+    }
+  </style>
+
+<!-- <link href="../login/css/bootstrap-dark.min.css" rel="stylesheet"> -->
+</head>
+	
+<body>
+<div class="container-fluid">
+  <div class="jumbotron jumbotron-fluid" id="s">
+      <center>
+        <p>پروازهای خریداری شده</p>       
+      </center>
+  </div>
+</div>
+    
+<div class="container">
+  <table class="table" id="flightTable" dir="rtl" border="1">
+    <thead>
+      <tr>
+        <th>مبدا - مقصد</th>
+        <th>ساعت پرواز</th>
+        <th>ساعت رسیدن</th>
+        <th>مدت زمان</th>
+        <th>رده پرواز</th>
+        <th>قیمت</th>
+        <th>تاریخ خرید</th>
+        <th>نام مسافر</th>
+      </tr>
+      
+      <button onclick="mainPage();">
+        صفحه اصلی
+      </button> 
+
+    </thead>
+    </table>
+ 
+</div>
+<script src="js/userPanel.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+version: "3"
+
+volumes:
+  auth-postgres:
+    external: true
+  ticket-postgres:
+    external: true
+
+services:
+  auth-postgres-0:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - auth-postgres:/var/lib/postgresql/hw-auth/data
+  ticket-postgres-0:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ticket-postgres:/var/lib/postgresql/hw-ticket/data
+  redis-server:
+    restart: on-failure
+    image: "redis"
+  node:
+    restart: on-failure
+    links:
+      - ticket-postgres-0
+      - go
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+  go:
+    restart: on-failure
+    links:
+      - auth-postgres-0
+      - redis-server
+    build:
+      context: ./auth-service
+      dockerfile: ./Dockerfile
+  hw-nginx:
+    restart: on-failure
+    links:
+      - node
+      - go
+    build:
+      context: ./front
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:80"

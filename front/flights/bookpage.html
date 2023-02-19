@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Booking Confirmation</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style type="text/css">
+  .form_edit{
+    width: 900px;
+    margin: auto;
+  }  
+
+  body{
+      background-image: url("imgs/c.jpg");
+      background-repeat: no-repeat;
+      background-size: cover;
+      color: rgb(0, 0, 0);
+      direction:rtl;
+	    text-align:right;
+  }
+
+ </style>
+
+<link href="../login/css/bootstrap-dark.min.css" rel="stylesheet">
+
+</head>
+<body>
+<!-- CONFIRMATION FORM -->
+<div class="container form_edit" >
+  <p style="font-size: 25px;" id="depart"></p>
+  <p style="font-size: 40px;" id="Airline"></p>
+
+  <h4 id=infoNumber>ورود اطلاعات مسافر 1:</h4>
+
+  <form action="userPanel.html" method="dialog"> 
+    <div class="form-group">
+      <label>نام</label>
+      <input type="name" class="form-control"  placeholder="نام" id="firstname" name="firstname" required = "true">
+    </div>
+    <div class="form-group">
+      <label>نام‌خانوادگی</label>
+      <input type="name" class="form-control"  placeholder="نام‌خانوادگی" id="lastname" name="lastname" required = "true">
+    </div>
+    <div class="form-group">
+        <label>شماره پاسپورت</label>
+        <input type="number" class="form-control"  placeholder="شماره پاسپورت" id="passportnumber" name="passportnumber" required = "true">
+    </div>
+    <button type="submit" onclick="getInfo();" class="btn btn-success">تایید رزرو</button> 
+  </form>
+</div>
+
+<script src="js/booking-info.js"></script>
+
+</body>
+</html>
