@@ -63,7 +63,7 @@ router.post("/", async (req, res) => {
 var get_user = async function (token) {
 
     try {
-        var res = syncrequest('GET', 'http://go:9000/user-info', {
+        var res = syncrequest('GET', 'http://127.0.0.1:9000/user-info', {
             headers: {
                 'Authorization': `JWT ${token}`,
             },

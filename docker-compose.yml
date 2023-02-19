@@ -19,6 +19,8 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - ticket-postgres:/var/lib/postgresql/hw-ticket/data
+    ports:
+      - "9001:5432"
   redis-server:
     restart: on-failure
     image: "redis"
@@ -27,9 +29,12 @@ services:
     links:
       - ticket-postgres-0
       - go
+      - bank
     build:
       context: ./
       dockerfile: ./Dockerfile
+    ports:
+      - "9090:9090"
   go:
     restart: on-failure
     links:
@@ -38,6 +43,15 @@ services:
     build:
       context: ./auth-service
       dockerfile: ./Dockerfile
+    ports:
+      - "9000:9000"
+  bank:
+    restart: on-failure
+    build:
+      context: ./Bank_back
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
   hw-nginx:
     restart: on-failure
     links:
